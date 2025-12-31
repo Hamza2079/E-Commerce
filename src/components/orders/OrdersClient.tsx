@@ -122,11 +122,11 @@ export default function OrdersClient({ initialOrdersData }: OrdersClientProps) {
                       {item.product.title}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      Qty: {item.count} × ${item.product.price}
+                      Qty: {item.count} × ${item.price}
                     </p>
                   </div>
                   <div className="font-semibold">
-                    ${(item.count * item.product.price).toFixed(2)}
+                    ${(item.count * item.price).toFixed(2)}
                   </div>
                 </div>
               ))}

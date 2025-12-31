@@ -122,7 +122,7 @@ export default function CheckoutDialog({
           phone: selectedAddress.phone,
           city: selectedAddress.city,
         },
-        `${window.location.origin}/allorders`
+        `${window.location.origin}`
       );
 
       if (response.status === "success" && response.session?.url) {
