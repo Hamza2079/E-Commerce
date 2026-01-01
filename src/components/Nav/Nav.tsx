@@ -211,7 +211,7 @@ export default function Nav() {
                 <Link
                   href="/wishlist"
                   aria-label="Wishlist"
-                  className="transition-all p-3 duration-300 hover:scale-110 hover:text-red-500"
+                  className="transition-all duration-300 hover:scale-110 hover:text-red-500"
                 >
                   <Heart className="h-5 w-5 hover:fill-current" />
                 </Link>
