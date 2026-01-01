@@ -379,7 +379,7 @@ export default async function ProductDetails({
               {relatedProducts.map((relatedProduct) => (
                 <CarouselItem
                   key={relatedProduct._id}
-                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                  className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
                 >
                   <ProductCard product={relatedProduct} />
                 </CarouselItem>
