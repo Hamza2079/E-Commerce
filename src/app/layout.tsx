@@ -6,6 +6,7 @@ import Footer from "../components/footer/Footer";
 import { Toaster } from "sonner";
 import AuthProvider from "../providers/sessionProvider";
 import ReduxProvider from "../providers/ReduxProvider";
+import LocalStorageSync from "../components/LocalStorageSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,7 +20,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Shop Mart",
-  description: "Shop mart is an E-Commerce Application That will help you to make your shopping easily",
+  description:
+    "Shop mart is an E-Commerce Application That will help you to make your shopping easily",
 };
 
 export default function RootLayout({
@@ -34,6 +36,7 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <AuthProvider>
+            <LocalStorageSync />
             <Nav />
             <Toaster richColors />
             {children}

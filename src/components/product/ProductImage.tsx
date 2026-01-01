@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ProductImageProps } from "@/src/types/componentProps.types";
+import InCartBadge from "./InCartBadge";
 
 export default function ProductImage({
   imageCover,
@@ -27,7 +28,7 @@ export default function ProductImage({
       />
 
       {/* Badges */}
-      <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none">
+      <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none z-10">
         {!inStock && (
           <Badge variant="destructive" className="shadow-lg">
             Out of Stock
@@ -38,6 +39,7 @@ export default function ProductImage({
             Popular
           </Badge>
         )}
+        <InCartBadge productId={productId} />
       </div>
     </Link>
   );

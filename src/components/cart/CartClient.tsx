@@ -13,8 +13,15 @@ import {
   removeFromCart,
   clearCart,
 } from "@/src/app/Actions/cart.actions";
+import { getCartCount } from "@/src/app/Actions/getCartCount";
 import ClearCartButton from "./ClearCartButton";
 import CheckoutDialog from "../checkout/CheckoutDialog";
+import { useAppDispatch } from "@/src/store/hooks";
+import {
+  decrementCart,
+  resetCart,
+  setCartCount,
+} from "@/src/store/slices/cartSlice";
 
 interface CartClientProps {
   initialCartData: CartData;
@@ -22,6 +29,7 @@ interface CartClientProps {
 
 export default function CartClient({ initialCartData }: CartClientProps) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const handleUpdateQuantity = async (id: string, newQuantity: number) => {
@@ -29,13 +37,15 @@ export default function CartClient({ initialCartData }: CartClientProps) {
       const response = await updateCartItemQuantity(id, newQuantity);
 
       if (response.status === "success") {
+        // Refetch cart count to ensure accuracy
+        const count = await getCartCount();
+        dispatch(setCartCount(count));
+
         toast.success("Quantity updated", {
           position: "top-right",
           duration: 2000,
         });
         router.refresh();
-        // Dispatch custom event to update cart count
-        window.dispatchEvent(new Event("cartUpdated"));
       } else {
         toast.error(response.message || "Failed to update quantity", {
           position: "top-right",
@@ -55,13 +65,15 @@ export default function CartClient({ initialCartData }: CartClientProps) {
       const response = await removeFromCart(id);
 
       if (response.status === "success") {
+        // Refetch cart count to get accurate count (item might have had quantity > 1)
+        const count = await getCartCount();
+        dispatch(setCartCount(count));
+
         toast.success("Item removed from cart", {
           position: "top-right",
           duration: 2000,
         });
         router.refresh();
-        // Dispatch custom event to update cart count
-        window.dispatchEvent(new Event("cartUpdated"));
       } else {
         toast.error(response.message || "Failed to remove item", {
           position: "top-right",
@@ -81,13 +93,12 @@ export default function CartClient({ initialCartData }: CartClientProps) {
       const response = await clearCart();
       console.log(response);
       if (response.message == "success") {
+        dispatch(resetCart());
         toast.success("Cart cleared", {
           position: "top-right",
           duration: 2000,
         });
         router.refresh();
-        // Dispatch custom event to update cart count
-        window.dispatchEvent(new Event("cartUpdated"));
       } else {
         toast.error(response.message || "Failed to clear cart", {
           position: "top-right",

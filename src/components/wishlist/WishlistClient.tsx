@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import Image from "next/image";
 import { removeFromWishlist } from "@/src/app/Actions/wishlist.actions";
@@ -24,15 +25,26 @@ export default function WishlistClient({
   const [wishlistItems, setWishlistItems] = useState<WishlistProduct[]>(
     initialWishlistData.data || []
   );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
 
   const handleRemove = async (productId: string) => {
+    setDeletingId(productId);
     try {
       const response = await removeFromWishlist(productId);
       if (response.status === "success") {
         setWishlistItems(
           wishlistItems.filter((item) => item._id !== productId)
         );
+        // Sync localStorage
+        const wishlistLocalItems = JSON.parse(
+          localStorage.getItem("wishlist") || "[]"
+        );
+        const updatedWishlist = wishlistLocalItems.filter(
+          (id: string) => id !== productId
+        );
+        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+
         toast.success("Removed from wishlist", {
           position: "top-right",
           duration: 2000,
@@ -48,6 +60,8 @@ export default function WishlistClient({
         position: "top-right",
         duration: 3000,
       });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -101,10 +115,15 @@ export default function WishlistClient({
             {/* Remove Button */}
             <button
               onClick={() => handleRemove(product._id)}
+              disabled={deletingId === product._id}
               className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-all duration-300 hover:scale-110 hover:text-red-500 shadow-lg z-10"
               aria-label="Remove from wishlist"
             >
-              <Trash2 className="h-5 w-5" />
+              {deletingId === product._id ? (
+                <Spinner className="h-5 w-5" />
+              ) : (
+                <Trash2 className="h-5 w-5" />
+              )}
             </button>
 
             {/* Product Info */}

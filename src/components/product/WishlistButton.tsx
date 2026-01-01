@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { WishlistButtonProps } from "@/src/types/componentProps.types";
 import {
   addToWishlist,
@@ -19,6 +20,12 @@ export default function WishlistButton({
   const [isLoading, setIsLoading] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Check localStorage on mount for wishlist status
+  useEffect(() => {
+    const wishlistItems = JSON.parse(localStorage.getItem("wishlist") || "[]");
+    setIsInWishlist(wishlistItems.includes(productId));
+  }, [productId]);
 
   const handleToggleWishlist = async () => {
     // Check if user is logged in
@@ -40,6 +47,15 @@ export default function WishlistButton({
         const response = await removeFromWishlist(productId);
         if (response.status === "success") {
           setIsInWishlist(false);
+          // Sync localStorage
+          const wishlistItems = JSON.parse(
+            localStorage.getItem("wishlist") || "[]"
+          );
+          const updatedWishlist = wishlistItems.filter(
+            (id: string) => id !== productId
+          );
+          localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+
           toast.success("Removed from wishlist", {
             position: "top-right",
             duration: 2000,
@@ -55,6 +71,13 @@ export default function WishlistButton({
         const response = await addToWishlist(productId);
         if (response.status === "success") {
           setIsInWishlist(true);
+          // Update localStorage
+          const wishlistItems = JSON.parse(
+            localStorage.getItem("wishlist") || "[]"
+          );
+          wishlistItems.push(productId);
+          localStorage.setItem("wishlist", JSON.stringify(wishlistItems));
+
           toast.success("Added to wishlist", {
             position: "top-right",
             duration: 2000,
@@ -85,7 +108,11 @@ export default function WishlistButton({
       }`}
       aria-label={`${isInWishlist ? "Remove from" : "Add to"} wishlist`}
     >
-      <Heart className={`h-5 w-5 ${isInWishlist ? "fill-current" : ""}`} />
+      {isLoading ? (
+        <Spinner className="h-5 w-5" />
+      ) : (
+        <Heart className={`h-5 w-5 ${isInWishlist ? "fill-current" : ""}`} />
+      )}
     </button>
   );
 }

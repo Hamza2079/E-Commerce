@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
 import {
   addToWishlist,
   removeFromWishlist,
 } from "@/src/app/Actions/wishlist.actions";
+import { addToCart } from "@/src/app/Actions/cart.actions";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ProductActionsProps } from "@/src/types/componentProps.types";
+import { useAppDispatch } from "@/src/store/hooks";
+import { incrementCart } from "@/src/store/slices/cartSlice";
 
 export default function ProductActions({
   productId,
@@ -22,17 +26,59 @@ export default function ProductActions({
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  const handleAddToCart = () => {
-    console.log("Add to cart:", {
-      productId,
-      productTitle,
-      price,
-      quantity: selectedQuantity,
-    });
-    // TODO: Implement cart functionality
+  // Check localStorage on mount for wishlist status
+  useEffect(() => {
+    const wishlistItems = JSON.parse(localStorage.getItem("wishlist") || "[]");
+    setIsWishlisted(wishlistItems.includes(productId));
+  }, [productId]);
+
+  const handleAddToCart = async () => {
+    // Check if user is logged in
+    if (!session) {
+      toast.error("Please sign in to add items to cart", {
+        position: "top-right",
+        duration: 3000,
+      });
+      const callbackUrl = encodeURIComponent(window.location.pathname);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+      return;
+    }
+
+    setIsAddingToCart(true);
+    try {
+      const response = await addToCart(productId);
+      if (response.status === "success") {
+        dispatch(incrementCart());
+        // Sync cart to localStorage
+        const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+        if (!cartItems.includes(productId)) {
+          cartItems.push(productId);
+          localStorage.setItem("cart", JSON.stringify(cartItems));
+        }
+
+        toast.success(`Added ${productTitle} to cart`, {
+          position: "top-right",
+          duration: 2000,
+        });
+      } else {
+        toast.error(response.message || "Failed to add to cart", {
+          position: "top-right",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      toast.error("An error occurred", {
+        position: "top-right",
+        duration: 3000,
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   const handleToggleWishlist = async () => {
@@ -55,6 +101,15 @@ export default function ProductActions({
         const response = await removeFromWishlist(productId);
         if (response.status === "success") {
           setIsWishlisted(false);
+          // Sync localStorage
+          const wishlistItems = JSON.parse(
+            localStorage.getItem("wishlist") || "[]"
+          );
+          const updatedWishlist = wishlistItems.filter(
+            (id: string) => id !== productId
+          );
+          localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+
           toast.success("Removed from wishlist", {
             position: "top-right",
             duration: 2000,
@@ -70,6 +125,15 @@ export default function ProductActions({
         const response = await addToWishlist(productId);
         if (response.status === "success") {
           setIsWishlisted(true);
+          // Sync localStorage
+          const wishlistItems = JSON.parse(
+            localStorage.getItem("wishlist") || "[]"
+          );
+          if (!wishlistItems.includes(productId)) {
+            wishlistItems.push(productId);
+            localStorage.setItem("wishlist", JSON.stringify(wishlistItems));
+          }
+
           toast.success("Added to wishlist", {
             position: "top-right",
             duration: 2000,
@@ -139,11 +203,15 @@ export default function ProductActions({
       <div className="flex gap-4">
         <Button
           size="lg"
-          disabled={!inStock}
+          disabled={!inStock || isAddingToCart}
           onClick={handleAddToCart}
           className="flex-1 transition-all duration-300 hover:scale-105 hover:shadow-lg"
         >
-          <ShoppingCart className="h-5 w-5 mr-2" />
+          {isAddingToCart ? (
+            <Spinner className="h-5 w-5 mr-2" />
+          ) : (
+            <ShoppingCart className="h-5 w-5 mr-2" />
+          )}
           {inStock ? "Add to Cart" : "Out of Stock"}
         </Button>
 
@@ -156,7 +224,13 @@ export default function ProductActions({
             isWishlisted ? "text-red-500 border-red-500" : ""
           }`}
         >
-          <Heart className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`} />
+          {isLoading ? (
+            <Spinner className="h-5 w-5" />
+          ) : (
+            <Heart
+              className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`}
+            />
+          )}
         </Button>
       </div>
     </div>
