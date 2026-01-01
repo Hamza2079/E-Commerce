@@ -23,11 +23,13 @@ export default function WishlistButton({
   const handleToggleWishlist = async () => {
     // Check if user is logged in
     if (!session) {
-      toast.error("You must be logged in to add to wishlist", {
+      toast.error("Please sign in to add items to your wishlist", {
         position: "top-right",
         duration: 3000,
       });
-      router.push("/login");
+      // Redirect to login with callback URL to return to this page
+      const callbackUrl = encodeURIComponent(window.location.pathname);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
       return;
     }
 

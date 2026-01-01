@@ -137,11 +137,7 @@ export default function Nav() {
                   className="transition-all p-7 duration-300 hover:scale-110 hover:bg-primary/10"
                 >
                   {session ? (
-                    <p>
-                      {session.user?.name &&
-                        session.user.name.charAt(0).toUpperCase() +
-                          session.user.name.slice(1)}
-                    </p>
+                    <p>{session.user?.name?.charAt(0)?.toUpperCase()}</p>
                   ) : (
                     <User className="h-5 w-5" />
                   )}

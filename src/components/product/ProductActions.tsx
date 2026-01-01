@@ -3,6 +3,13 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "@/src/app/Actions/wishlist.actions";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { ProductActionsProps } from "@/src/types/componentProps.types";
 
 export default function ProductActions({
@@ -14,6 +21,9 @@ export default function ProductActions({
 }: ProductActionsProps) {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const handleAddToCart = () => {
     console.log("Add to cart:", {
@@ -25,10 +35,60 @@ export default function ProductActions({
     // TODO: Implement cart functionality
   };
 
-  const handleToggleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    console.log("Toggle wishlist:", productId);
-    // TODO: Implement wishlist functionality
+  const handleToggleWishlist = async () => {
+    // Check if user is logged in
+    if (!session) {
+      toast.error("Please sign in to add items to your wishlist", {
+        position: "top-right",
+        duration: 3000,
+      });
+      // Redirect to login with callback URL to return to this page
+      const callbackUrl = encodeURIComponent(window.location.pathname);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        const response = await removeFromWishlist(productId);
+        if (response.status === "success") {
+          setIsWishlisted(false);
+          toast.success("Removed from wishlist", {
+            position: "top-right",
+            duration: 2000,
+          });
+        } else {
+          toast.error(response.message || "Failed to remove from wishlist", {
+            position: "top-right",
+            duration: 3000,
+          });
+        }
+      } else {
+        // Add to wishlist
+        const response = await addToWishlist(productId);
+        if (response.status === "success") {
+          setIsWishlisted(true);
+          toast.success("Added to wishlist", {
+            position: "top-right",
+            duration: 2000,
+          });
+        } else {
+          toast.error(response.message || "Failed to add to wishlist", {
+            position: "top-right",
+            duration: 3000,
+          });
+        }
+      }
+    } catch (error) {
+      toast.error("An error occurred", {
+        position: "top-right",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const incrementQuantity = () => {
@@ -91,6 +151,7 @@ export default function ProductActions({
           variant="outline"
           size="lg"
           onClick={handleToggleWishlist}
+          disabled={isLoading}
           className={`transition-all duration-300 hover:scale-105 ${
             isWishlisted ? "text-red-500 border-red-500" : ""
           }`}
