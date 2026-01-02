@@ -23,7 +23,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import DOMPurify from "isomorphic-dompurify";
 import type { Metadata } from "next";
 
 // Force dynamic rendering to prevent build-time errors
@@ -396,15 +395,12 @@ export default async function ProductDetails({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Product",
-              name: DOMPurify.sanitize(product.title),
-              image: [
-                DOMPurify.sanitize(product.imageCover),
-                ...product.images.map((img) => DOMPurify.sanitize(img)),
-              ],
-              description: DOMPurify.sanitize(product.description),
+              name: product.title,
+              image: [product.imageCover, ...product.images],
+              description: product.description,
               brand: {
                 "@type": "Brand",
-                name: DOMPurify.sanitize(product.brand.name),
+                name: product.brand.name,
               },
               offers: {
                 "@type": "Offer",
