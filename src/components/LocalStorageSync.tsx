@@ -14,6 +14,8 @@ export default function LocalStorageSync() {
 
   useEffect(() => {
     async function syncToLocalStorage() {
+      if (status === "loading") return; // Wait for session to load
+
       if (status !== "authenticated" || !session) {
         // User is not logged in - clear localStorage
         localStorage.removeItem("wishlist");
@@ -21,6 +23,7 @@ export default function LocalStorageSync() {
         return;
       }
 
+      // User is authenticated - fetch and sync data
       try {
         // Fetch and sync wishlist
         const wishlistData = await getWishlist();
@@ -29,6 +32,9 @@ export default function LocalStorageSync() {
             (item) => item._id || item.id
           );
           localStorage.setItem("wishlist", JSON.stringify(wishlistIds));
+        } else {
+          // No wishlist data, set empty array
+          localStorage.setItem("wishlist", JSON.stringify([]));
         }
 
         // Fetch and sync cart
@@ -38,6 +44,9 @@ export default function LocalStorageSync() {
             (item: any) => item.product._id || item.product.id
           );
           localStorage.setItem("cart", JSON.stringify(cartIds));
+        } else {
+          // No cart data, set empty array
+          localStorage.setItem("cart", JSON.stringify([]));
         }
       } catch (error) {
         console.error("Error syncing to localStorage:", error);
@@ -45,7 +54,7 @@ export default function LocalStorageSync() {
     }
 
     syncToLocalStorage();
-  }, [session, status]);
+  }, [session, status]); // Re-run whenever session or status changes
 
   return null; // This component doesn't render anything
 }
