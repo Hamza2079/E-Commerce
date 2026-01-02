@@ -5,6 +5,7 @@ import { ArrowRight, Truck, RotateCcw, Shield, Sparkles } from "lucide-react";
 import ProductCard from "@/src/components/product/ProductCard";
 import CategoryCard from "@/src/components/CategoryCard";
 import NewsletterSignup from "@/src/components/NewsletterSignup";
+import LoginSuccessToast from "@/src/components/LoginSuccessToast";
 import { ProductI } from "@/src/types/product.types";
 import { CategoryI } from "@/src/types/category.types";
 
@@ -25,6 +26,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-background">
+      <LoginSuccessToast />
       {/* Hero Section */}
       <section
         className="relative bg-gradient-to-br from-primary/10 via-background to-primary/5 py-20 md:py-32 overflow-hidden"

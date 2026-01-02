@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface InCartBadgeProps {
   productId: string;
@@ -10,11 +11,18 @@ interface InCartBadgeProps {
 
 export default function InCartBadge({ productId }: InCartBadgeProps) {
   const [isInCart, setIsInCart] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
+    // Only check localStorage if user is logged in
+    if (!session) {
+      setIsInCart(false);
+      return;
+    }
+
     const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
     setIsInCart(cartItems.includes(productId));
-  }, [productId]);
+  }, [productId, session]);
 
   if (!isInCart) return null;
 

@@ -31,11 +31,16 @@ export default function ProductActions({
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  // Check localStorage on mount for wishlist status
+  // Check localStorage on mount for wishlist status - only if logged in
   useEffect(() => {
+    if (!session) {
+      setIsWishlisted(false);
+      return;
+    }
+
     const wishlistItems = JSON.parse(localStorage.getItem("wishlist") || "[]");
     setIsWishlisted(wishlistItems.includes(productId));
-  }, [productId]);
+  }, [productId, session]);
 
   const handleAddToCart = async () => {
     // Check if user is logged in

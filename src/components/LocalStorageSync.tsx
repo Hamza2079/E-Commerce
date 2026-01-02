@@ -7,14 +7,19 @@ import { getCart } from "@/src/app/Actions/cart.actions";
 
 /**
  * This component syncs wishlist and cart data to localStorage
- * when the user logs in, so badges can show without API calls
+ * when the user logs in, and clears it when they log out
  */
 export default function LocalStorageSync() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
     async function syncToLocalStorage() {
-      if (status !== "authenticated" || !session) return;
+      if (status !== "authenticated" || !session) {
+        // User is not logged in - clear localStorage
+        localStorage.removeItem("wishlist");
+        localStorage.removeItem("cart");
+        return;
+      }
 
       try {
         // Fetch and sync wishlist

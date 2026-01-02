@@ -33,16 +33,15 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
 
-  async function handleRegister(values: registerSchematype ) {
-    const data = await register(values)
-    console.log(data)
-    if(data.message=="success"){
-      router.push("/login")
+  async function handleRegister(values: registerSchematype) {
+    const data = await register(values);
+    console.log(data);
+    if (data.message == "success") {
+      router.push("/login");
     }
-    
   }
 
-    const router=useRouter()
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -228,7 +227,6 @@ export default function Register() {
                 className="w-full h-11 text-base font-medium transition-all duration-300 hover:scale-[1.02] hover:shadow-lg mt-6"
               >
                 {form.formState.isSubmitting ? <Spinner /> : "Create Account"}
-                
               </Button>
             </form>
           </Form>
@@ -268,6 +266,17 @@ export default function Register() {
           </Link>
         </p>
       </div>
+
+      {/* Full-Screen Loading Overlay */}
+      {form.formState.isSubmitting && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card p-8 rounded-lg shadow-xl border flex flex-col items-center gap-4">
+            <Spinner size="xl" />
+            <p className="text-lg font-medium">Creating account...</p>
+            <p className="text-sm text-muted-foreground">Please wait</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

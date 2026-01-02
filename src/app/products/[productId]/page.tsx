@@ -22,6 +22,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import DOMPurify from "isomorphic-dompurify";
 import type { Metadata } from "next";
 
 // Generate metadata for SEO
@@ -332,12 +333,15 @@ export default async function ProductDetails({
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
-            name: product.title,
-            image: [product.imageCover, ...product.images],
-            description: product.description,
+            name: DOMPurify.sanitize(product.title),
+            image: [
+              DOMPurify.sanitize(product.imageCover),
+              ...product.images.map((img) => DOMPurify.sanitize(img)),
+            ],
+            description: DOMPurify.sanitize(product.description),
             brand: {
               "@type": "Brand",
-              name: product.brand.name,
+              name: DOMPurify.sanitize(product.brand.name),
             },
             offers: {
               "@type": "Offer",

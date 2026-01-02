@@ -21,11 +21,16 @@ export default function WishlistButton({
   const { data: session } = useSession();
   const router = useRouter();
 
-  // Check localStorage on mount for wishlist status
+  // Check localStorage on mount for wishlist status - only if logged in
   useEffect(() => {
+    if (!session) {
+      setIsInWishlist(false);
+      return;
+    }
+
     const wishlistItems = JSON.parse(localStorage.getItem("wishlist") || "[]");
     setIsInWishlist(wishlistItems.includes(productId));
-  }, [productId]);
+  }, [productId, session]);
 
   const handleToggleWishlist = async () => {
     // Check if user is logged in
