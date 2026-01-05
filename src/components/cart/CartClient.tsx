@@ -21,6 +21,7 @@ import {
   decrementCart,
   resetCart,
   setCartCount,
+  removeCartItem,
 } from "@/src/store/slices/cartSlice";
 
 interface CartClientProps {
@@ -68,6 +69,7 @@ export default function CartClient({ initialCartData }: CartClientProps) {
         // Refetch cart count to get accurate count (item might have had quantity > 1)
         const count = await getCartCount();
         dispatch(setCartCount(count));
+        dispatch(removeCartItem(id)); // Remove from Redux cart items
 
         toast.success("Item removed from cart", {
           position: "top-right",
@@ -91,7 +93,6 @@ export default function CartClient({ initialCartData }: CartClientProps) {
   const handleClearCart = async () => {
     try {
       const response = await clearCart();
-      console.log(response);
       if (response.message == "success") {
         dispatch(resetCart());
         toast.success("Cart cleared", {

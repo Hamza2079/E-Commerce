@@ -19,15 +19,11 @@ interface OrdersClientProps {
 }
 
 export default function OrdersClient({ initialOrdersData }: OrdersClientProps) {
-  console.log("OrdersClient received data:", initialOrdersData);
-
   // Handle both array response and object response
   // Handle both array response and object response
   const orders = Array.isArray(initialOrdersData)
     ? initialOrdersData
     : initialOrdersData?.data || [];
-
-  console.log("Orders array:", orders);
 
   if (orders.length === 0) {
     return (

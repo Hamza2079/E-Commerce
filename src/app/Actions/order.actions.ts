@@ -72,8 +72,6 @@ export async function createCardPaymentSession(
 export async function getUserOrders(): Promise<GetOrdersResponse> {
   // Use the custom getToken helper which works with server actions
   const authToken = await getToken();
-  
-  console.log("Auth token:", authToken);
 
   if (!authToken) {
     console.error("No auth token found");
@@ -90,8 +88,6 @@ export async function getUserOrders(): Promise<GetOrdersResponse> {
   try {
     const decoded = jwtDecode<{ id: string }>(authToken as string);
     userId = decoded.id;
-    console.log("Decoded token:", decoded);
-    console.log("Extracted user ID:", userId);
   } catch (error) {
     console.error("Error decoding token:", error);
     return {
@@ -109,7 +105,6 @@ export async function getUserOrders(): Promise<GetOrdersResponse> {
   }
 
   const apiUrl = `https://ecommerce.routemisr.com/api/v1/orders/user/${userId}`;
-  console.log("Fetching orders from:", apiUrl);
 
   try {
     const response = await fetch(apiUrl, {
@@ -120,7 +115,6 @@ export async function getUserOrders(): Promise<GetOrdersResponse> {
     });
 
     const data = await response.json();
-    console.log("Orders API response:", JSON.stringify(data, null, 2));
     return data;
   } catch (error) {
     console.error("Error fetching orders:", error);

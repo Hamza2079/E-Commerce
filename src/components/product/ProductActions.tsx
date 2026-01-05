@@ -9,12 +9,13 @@ import {
   removeFromWishlist,
 } from "@/src/app/Actions/wishlist.actions";
 import { addToCart } from "@/src/app/Actions/cart.actions";
+import { getCartCount } from "@/src/app/Actions/getCartCount";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ProductActionsProps } from "@/src/types/componentProps.types";
 import { useAppDispatch } from "@/src/store/hooks";
-import { incrementCart } from "@/src/store/slices/cartSlice";
+import { setCartCount, addCartItem } from "@/src/store/slices/cartSlice";
 
 export default function ProductActions({
   productId,
@@ -56,9 +57,13 @@ export default function ProductActions({
 
     setIsAddingToCart(true);
     try {
-      const response = await addToCart(productId);
+      const response = await addToCart(productId, selectedQuantity);
       if (response.status === "success") {
-        dispatch(incrementCart());
+        // Fetch actual cart count from server to ensure accuracy
+        const actualCount = await getCartCount();
+        dispatch(setCartCount(actualCount));
+        dispatch(addCartItem(productId));
+
         // Sync cart to localStorage
         const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
         if (!cartItems.includes(productId)) {
@@ -66,7 +71,7 @@ export default function ProductActions({
           localStorage.setItem("cart", JSON.stringify(cartItems));
         }
 
-        toast.success(`Added ${productTitle} to cart`, {
+        toast.success(`Added ${selectedQuantity} × ${productTitle} to cart`, {
           position: "top-right",
           duration: 2000,
         });

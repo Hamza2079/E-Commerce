@@ -49,7 +49,6 @@ export default function ChangePasswordDialog() {
     setIsLoading(true);
     try {
       const response = await changePassword(data);
-      console.log(response);
 
       if (response.message === "success" || response.token) {
         toast.success("Password changed successfully! Please login again.");

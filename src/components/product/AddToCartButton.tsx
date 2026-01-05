@@ -10,7 +10,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/src/store/hooks";
-import { incrementCart } from "@/src/store/slices/cartSlice";
+import { setCartCount, addCartItem } from "@/src/store/slices/cartSlice";
+import { getCartCount } from "@/src/app/Actions/getCartCount";
 
 export default function AddToCartButton({
   productId,
@@ -37,14 +38,15 @@ export default function AddToCartButton({
     setIsLoading(true);
     try {
       const response = await addToCart(productId);
-      console.log("Add to cart:", { response });
       if (response.status === "success") {
         toast.success(response.message, {
           position: "top-right",
           duration: 2000,
         });
-        // Dispatch Redux action to update cart count
-        dispatch(incrementCart());
+        // Fetch actual cart count from server and update Redux
+        const actualCount = await getCartCount();
+        dispatch(setCartCount(actualCount));
+        dispatch(addCartItem(productId));
       } else {
         toast.error(response.message, {
           position: "top-right",

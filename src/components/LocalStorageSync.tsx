@@ -4,22 +4,26 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getWishlist } from "@/src/app/Actions/wishlist.actions";
 import { getCart } from "@/src/app/Actions/cart.actions";
+import { useAppDispatch } from "@/src/store/hooks";
+import { setCartItems, resetCart } from "@/src/store/slices/cartSlice";
 
 /**
- * This component syncs wishlist and cart data to localStorage
+ * This component syncs wishlist and cart data to localStorage and Redux
  * when the user logs in, and clears it when they log out
  */
 export default function LocalStorageSync() {
   const { data: session, status } = useSession();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     async function syncToLocalStorage() {
       if (status === "loading") return; // Wait for session to load
 
       if (status !== "authenticated" || !session) {
-        // User is not logged in - clear localStorage
+        // User is not logged in - clear localStorage and Redux
         localStorage.removeItem("wishlist");
         localStorage.removeItem("cart");
+        dispatch(resetCart());
         return;
       }
 
@@ -44,9 +48,11 @@ export default function LocalStorageSync() {
             (item: any) => item.product._id || item.product.id
           );
           localStorage.setItem("cart", JSON.stringify(cartIds));
+          dispatch(setCartItems(cartIds)); // Sync to Redux
         } else {
           // No cart data, set empty array
           localStorage.setItem("cart", JSON.stringify([]));
+          dispatch(setCartItems([])); // Sync to Redux
         }
       } catch (error) {
         console.error("Error syncing to localStorage:", error);

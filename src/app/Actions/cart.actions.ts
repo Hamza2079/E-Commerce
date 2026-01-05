@@ -2,19 +2,38 @@
 
 import { getToken } from "@/lib/auth";
 
-export async function addToCart(productId:string){
-    const token=await getToken()
-const response = await fetch("https://ecommerce.routemisr.com/api/v1/cart", {
-        method: "POST",
+export async function addToCart(productId: string, count: number = 1) {
+  const token = await getToken();
+  
+  // Step 1: Add product to cart (this adds 1 item)
+  const response = await fetch("https://ecommerce.routemisr.com/api/v1/cart", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      token: token as string,
+    },
+    body: JSON.stringify({ productId: productId }),
+  });
+  
+  const data = await response.json();
+  
+  // Step 2: If count > 1, update the quantity
+  if (data.status === "success" && count > 1) {
+    const updateResponse = await fetch(
+      `https://ecommerce.routemisr.com/api/v1/cart/${productId}`,
+      {
+        method: "PUT",
         headers: {
-            "Content-Type": "application/json",
-            token: token as string
+          "Content-Type": "application/json",
+          token: token as string,
         },
-        body: JSON.stringify({productId:productId})
-    })
-    const data = await response.json()
-return(data);
-
+        body: JSON.stringify({ count: count }),
+      }
+    );
+    return await updateResponse.json();
+  }
+  
+  return data;
 }
 
 export async function getCart() {

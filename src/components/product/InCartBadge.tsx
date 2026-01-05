@@ -1,28 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useAppSelector } from "@/src/store/hooks";
 
 interface InCartBadgeProps {
   productId: string;
 }
 
 export default function InCartBadge({ productId }: InCartBadgeProps) {
-  const [isInCart, setIsInCart] = useState(false);
   const { data: session } = useSession();
+  const cartItems = useAppSelector((state) => state.cart.cartItems);
 
-  useEffect(() => {
-    // Only check localStorage if user is logged in
-    if (!session) {
-      setIsInCart(false);
-      return;
-    }
+  // Security: Only show badge if user is logged in
+  if (!session) return null;
 
-    const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-    setIsInCart(cartItems.includes(productId));
-  }, [productId, session]);
+  // Check if product is in cart
+  const isInCart = cartItems.includes(productId);
 
   if (!isInCart) return null;
 

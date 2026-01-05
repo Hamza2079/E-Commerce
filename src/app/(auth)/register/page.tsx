@@ -35,7 +35,6 @@ export default function Register() {
 
   async function handleRegister(values: registerSchematype) {
     const data = await register(values);
-    console.log(data);
     if (data.message == "success") {
       router.push("/login");
     }
@@ -54,7 +53,7 @@ export default function Register() {
   });
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center py-12 px-4">
+    <main className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
